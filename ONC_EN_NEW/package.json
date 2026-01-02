@@ -1,5 +1,6 @@
 {
   "name": "enstructura-consultants-platform",
+  "description": "Enstructura Structural Analysis Platform",
   "private": true,
   "version": "0.0.0",
   "type": "module",
