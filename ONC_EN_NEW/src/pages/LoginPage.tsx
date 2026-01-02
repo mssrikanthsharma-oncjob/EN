@@ -85,34 +85,34 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-secondary-50 to-primary-100 bg-pattern-dots">
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="w-full max-w-sm sm:max-w-md">
           {/* Header Section */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-large mb-6">
+          <div className="text-center mb-6 sm:mb-8 animate-fade-in">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl shadow-large mb-4 sm:mb-6">
               <img 
                 src="/logo.png" 
                 alt="Enstructura Consultants Logo" 
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
               />
             </div>
-            <h1 className="text-heading-1 mb-3 text-gradient">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 text-gradient">
               Enstructura
             </h1>
-            <p className="text-lg text-secondary-600 font-medium mb-2">
+            <p className="text-base sm:text-lg text-secondary-600 font-medium mb-2">
               Structural Analysis Platform
             </p>
-            <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+            <div className="w-20 sm:w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
           </div>
           
           {/* Login Card */}
-          <div className="card p-8 animate-slide-up">
+          <div className="card p-6 sm:p-8 animate-slide-up">
             <div className="mb-6">
-              <h2 className="text-heading-3 text-center mb-2">Welcome Back</h2>
-              <p className="text-body text-center">Sign in to your account to continue</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-center mb-2">Welcome Back</h2>
+              <p className="text-sm sm:text-base text-body text-center">Sign in to your account to continue</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
               {error && (
                 <div className="alert alert-danger animate-fade-in">
                   <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -177,7 +177,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn btn-primary btn-lg w-full"
+                className="btn btn-primary btn-lg w-full text-base sm:text-lg py-3 sm:py-4"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -196,17 +196,17 @@ const LoginPage: React.FC = () => {
             </form>
             
             {/* Demo Credentials */}
-            <div className="mt-8 p-4 bg-primary-50 rounded-xl border border-primary-200">
+            <div className="mt-6 sm:mt-8 p-4 bg-primary-50 rounded-xl border border-primary-200">
               <div className="text-center">
                 <h3 className="text-sm font-semibold text-primary-800 mb-3">Demo Credentials</h3>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-700">Username:</span>
-                    <code className="bg-white px-2 py-1 rounded font-mono text-primary-800 font-semibold">admin</code>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-1 sm:gap-0">
+                    <span className="text-primary-700 font-medium">Username:</span>
+                    <code className="bg-white px-2 py-1 rounded font-mono text-primary-800 font-semibold text-xs sm:text-sm">admin</code>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-700">Password:</span>
-                    <code className="bg-white px-2 py-1 rounded font-mono text-primary-800 font-semibold">password123</code>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm gap-1 sm:gap-0">
+                    <span className="text-primary-700 font-medium">Password:</span>
+                    <code className="bg-white px-2 py-1 rounded font-mono text-primary-800 font-semibold text-xs sm:text-sm">password123</code>
                   </div>
                 </div>
               </div>
@@ -214,8 +214,8 @@ const LoginPage: React.FC = () => {
           </div>
           
           {/* Footer */}
-          <div className="text-center mt-8 animate-fade-in">
-            <p className="text-caption">
+          <div className="text-center mt-6 sm:mt-8 animate-fade-in">
+            <p className="text-xs sm:text-sm text-caption">
               © 2026 Enstructura Consultants. All rights reserved.
             </p>
           </div>

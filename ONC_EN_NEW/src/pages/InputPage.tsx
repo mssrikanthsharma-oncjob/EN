@@ -387,16 +387,16 @@ const InputPage: React.FC = () => {
         <div className="section-padding">
           <div className="container-modern">
             {/* Header */}
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="text-heading-1 mb-4 text-gradient">
+            <div className="text-center mb-8 sm:mb-12 animate-fade-in">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-gradient">
                 Structural Analysis Input
               </h1>
-              <p className="text-body text-lg max-w-3xl mx-auto mb-8">
+              <p className="text-base sm:text-lg text-body max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
                 Complete all sections to generate your comprehensive structural assessment report with AI-powered analysis
               </p>
               
               {/* Quick Actions */}
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4">
                 <Button
                   variant="outline"
                   size="sm"
@@ -425,8 +425,8 @@ const InputPage: React.FC = () => {
             </div>
 
             {/* Progress Steps */}
-            <div className="mb-10 animate-slide-up">
-              <div className="card p-8 card-gradient">
+            <div className="mb-8 sm:mb-10 animate-slide-up px-4">
+              <div className="card p-4 sm:p-6 lg:p-8 card-gradient">
                 <Progress 
                   steps={progressSteps} 
                   currentStep={currentStep}
@@ -436,9 +436,9 @@ const InputPage: React.FC = () => {
             </div>
 
             {/* Form Content */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8 px-4">
               <div className="animate-slide-up">
-                <div className="card p-8 shadow-large">
+                <div className="card p-4 sm:p-6 lg:p-8 shadow-large">
                   {renderCurrentStep()}
                 </div>
               </div>
@@ -471,7 +471,7 @@ const InputPage: React.FC = () => {
                   <Alert variant="info" title="Processing Report">
                     <div className="flex items-center space-x-3">
                       <div className="loading-spinner w-5 h-5 flex-shrink-0"></div>
-                      <span>{processingStatus || 'Please wait while we process your structural analysis...'}</span>
+                      <span className="text-sm sm:text-base">{processingStatus || 'Please wait while we process your structural analysis...'}</span>
                     </div>
                   </Alert>
                 </div>
@@ -486,7 +486,7 @@ const InputPage: React.FC = () => {
                     dismissible
                     onDismiss={() => setProcessingError('')}
                   >
-                    {processingError}
+                    <span className="text-sm sm:text-base">{processingError}</span>
                   </Alert>
                 </div>
               )}
@@ -494,13 +494,15 @@ const InputPage: React.FC = () => {
               {/* Navigation Buttons */}
               <div className="animate-slide-up">
                 <Card padding="md" className="shadow-medium">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
                     <Button
                       variant="outline"
                       onClick={goToPreviousStep}
                       disabled={currentStepIndex === 0}
                       size="md"
                       type="button"
+                      fullWidth={true}
+                      className="sm:w-auto order-2 sm:order-1"
                       icon={
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -510,20 +512,22 @@ const InputPage: React.FC = () => {
                       Previous Step
                     </Button>
 
-                    <div className="flex items-center gap-3 px-4 py-2 bg-success-50 rounded-lg border border-success-200">
+                    <div className="flex items-center justify-center gap-3 px-4 py-2 bg-success-50 rounded-lg border border-success-200 order-1 sm:order-2">
                       <svg className="w-4 h-4 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-sm text-success-700 font-medium">Auto-saved</span>
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="order-3">
                       {currentStepIndex < progressSteps.length - 1 ? (
                         <Button
                           variant="primary"
                           onClick={goToNextStep}
                           size="md"
                           type="button"
+                          fullWidth={true}
+                          className="sm:w-auto"
                           iconPosition="right"
                           icon={
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -540,6 +544,8 @@ const InputPage: React.FC = () => {
                           loading={isSubmitting}
                           disabled={!isValid || processingError !== ''}
                           size="lg"
+                          fullWidth={true}
+                          className="sm:w-auto"
                           icon={
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

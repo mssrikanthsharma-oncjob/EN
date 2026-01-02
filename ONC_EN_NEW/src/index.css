@@ -75,14 +75,22 @@
   .form-input {
     display: block;
     width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #1e293b;
     background-color: white;
     border: 2px solid #e2e8f0;
     border-radius: 0.75rem;
     transition: all 0.2s ease;
+    min-height: 44px; /* Minimum touch target for mobile */
+  }
+  
+  @media (min-width: 640px) {
+    .form-input {
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+    }
   }
   
   .form-input::placeholder {
@@ -117,6 +125,12 @@
     margin-bottom: 0.5rem;
   }
   
+  @media (min-width: 640px) {
+    .form-label {
+      font-size: 0.875rem;
+    }
+  }
+  
   .form-error {
     margin-top: 0.5rem;
     font-size: 0.875rem;
@@ -138,6 +152,7 @@
     border: none;
     cursor: pointer;
     transform: scale(1);
+    min-height: 44px; /* Minimum touch target for mobile */
   }
   
   .btn:focus {
@@ -146,11 +161,17 @@
   }
   
   .btn:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
+  }
+  
+  @media (min-width: 640px) {
+    .btn:hover {
+      transform: scale(1.05);
+    }
   }
   
   .btn:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
   
   .btn:disabled {
