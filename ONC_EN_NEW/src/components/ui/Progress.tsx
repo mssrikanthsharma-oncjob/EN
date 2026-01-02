@@ -1,11 +1,9 @@
 import React from 'react';
-import Icon, { type IconName } from './Icon';
 
 export interface ProgressStep {
   id: string;
   title: string;
   description?: string;
-  icon?: IconName;
   status: 'completed' | 'active' | 'inactive';
 }
 
@@ -26,7 +24,7 @@ const Progress: React.FC<ProgressProps> = ({
 
   if (variant === 'vertical') {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div className={`space-y-6 ${className}`}>
         {steps.map((step, index) => {
           const isCompleted = step.status === 'completed';
           const isActive = step.status === 'active';
@@ -38,17 +36,19 @@ const Progress: React.FC<ProgressProps> = ({
                 <div className="flex-shrink-0">
                   <div
                     className={`
-                      flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 transform
+                      progress-step
                       ${isCompleted 
-                        ? 'bg-green-600 border-green-600 text-white shadow-lg scale-110' 
+                        ? 'progress-step-completed' 
                         : isActive 
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105' 
-                        : 'bg-gray-100 border-gray-300 text-gray-400 scale-100'
+                        ? 'progress-step-active' 
+                        : 'progress-step-inactive'
                       }
                     `}
                   >
                     {isCompleted ? (
-                      <Icon name="check" size="sm" className="animate-pulse" />
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
                     ) : (
                       <span className="text-sm font-semibold">{index + 1}</span>
                     )}
@@ -57,14 +57,14 @@ const Progress: React.FC<ProgressProps> = ({
                 <div className="ml-4 min-w-0 flex-1">
                   <h3
                     className={`
-                      text-sm font-semibold transition-all duration-200
-                      ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600 font-bold' : 'text-gray-500'}
+                      text-sm font-semibold transition-colors duration-200
+                      ${isActive ? 'text-primary-600' : isCompleted ? 'text-success-600' : 'text-secondary-500'}
                     `}
                   >
                     {step.title}
                   </h3>
                   {step.description && (
-                    <p className={`text-sm mt-1 transition-all duration-200 ${isCompleted ? 'text-green-500' : 'text-gray-500'}`}>
+                    <p className={`text-sm mt-1 transition-colors duration-200 ${isCompleted ? 'text-success-500' : 'text-secondary-500'}`}>
                       {step.description}
                     </p>
                   )}
@@ -73,8 +73,8 @@ const Progress: React.FC<ProgressProps> = ({
               {!isLast && (
                 <div
                   className={`
-                    absolute left-5 top-10 w-0.5 h-6 -ml-px transition-all duration-200
-                    ${isCompleted ? 'bg-green-600' : 'bg-gray-300'}
+                    absolute left-5 top-10 w-0.5 h-6 -ml-px transition-colors duration-200
+                    ${isCompleted ? 'bg-success-500' : 'bg-secondary-300'}
                   `}
                 />
               )}
@@ -98,32 +98,34 @@ const Progress: React.FC<ProgressProps> = ({
               <div className="flex flex-col items-center">
                 <div
                   className={`
-                    flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 transform
+                    progress-step
                     ${isCompleted 
-                      ? 'bg-green-600 border-green-600 text-white shadow-lg scale-110' 
+                      ? 'progress-step-completed' 
                       : isActive 
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-100 border-gray-300 text-gray-400 scale-100'
+                      ? 'progress-step-active' 
+                      : 'progress-step-inactive'
                     }
                   `}
                 >
                   {isCompleted ? (
-                    <Icon name="check" size="sm" className="animate-pulse" />
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                   ) : (
                     <span className="text-sm font-semibold">{index + 1}</span>
                   )}
                 </div>
-                <div className="mt-2 text-center">
+                <div className="mt-3 text-center max-w-24">
                   <h3
                     className={`
-                      text-sm font-semibold transition-all duration-200
-                      ${isActive ? 'text-blue-600' : isCompleted ? 'text-green-600 font-bold' : 'text-gray-500'}
+                      text-sm font-semibold transition-colors duration-200
+                      ${isActive ? 'text-primary-600' : isCompleted ? 'text-success-600' : 'text-secondary-500'}
                     `}
                   >
                     {step.title}
                   </h3>
                   {step.description && (
-                    <p className={`text-xs mt-1 max-w-20 transition-all duration-200 ${isCompleted ? 'text-green-500' : 'text-gray-500'}`}>
+                    <p className={`text-xs mt-1 transition-colors duration-200 ${isCompleted ? 'text-success-500' : 'text-secondary-500'}`}>
                       {step.description}
                     </p>
                   )}
@@ -133,8 +135,8 @@ const Progress: React.FC<ProgressProps> = ({
                 <div className="flex-1 mx-4">
                   <div
                     className={`
-                      h-0.5 w-full transition-all duration-200
-                      ${isCompleted ? 'bg-green-600' : index < currentIndex ? 'bg-green-600' : 'bg-gray-300'}
+                      progress-connector
+                      ${isCompleted ? 'progress-connector-completed' : index < currentIndex ? 'progress-connector-completed' : 'progress-connector-inactive'}
                     `}
                   />
                 </div>

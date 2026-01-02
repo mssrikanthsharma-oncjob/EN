@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: enstructura-consultants
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    buildCommand: ""
+    startCommand: "nginx -g 'daemon off;'"
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: enstructura-disk
+      mountPath: /data
+      sizeGB: 1

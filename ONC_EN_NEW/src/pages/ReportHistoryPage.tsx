@@ -165,33 +165,53 @@ const ReportHistoryPage: React.FC = () => {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card variant="engineering" icon="file-text" hover>
+            <Card variant="engineering" hover>
               <div className="text-center">
-                <div className="text-3xl font-bold text-slate-800 mb-1">{stats.totalReports}</div>
-                <div className="text-engineering-caption">Total Reports</div>
+                <div className="flex justify-center mb-3">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-secondary-800 mb-1">{stats.totalReports}</div>
+                <div className="text-caption">Total Reports</div>
               </div>
             </Card>
 
-            <Card variant="engineering" icon="calendar" hover>
+            <Card variant="engineering" hover>
               <div className="text-center">
-                <div className="text-3xl font-bold text-slate-800 mb-1">{stats.reportsThisMonth}</div>
-                <div className="text-engineering-caption">This Month</div>
+                <div className="flex justify-center mb-3">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-6 0h6m-6 0V7a1 1 0 00-1 1v9a2 2 0 002 2h4a2 2 0 002-2V8a1 1 0 00-1-1V7" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-secondary-800 mb-1">{stats.reportsThisMonth}</div>
+                <div className="text-caption">This Month</div>
               </div>
             </Card>
 
-            <Card variant="engineering" icon="dollar" hover>
+            <Card variant="engineering" hover>
               <div className="text-center">
-                <div className="text-3xl font-bold text-slate-800 mb-1">{formatINR(stats.averageCost)}</div>
-                <div className="text-engineering-caption">Average Cost</div>
+                <div className="flex justify-center mb-3">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-secondary-800 mb-1">{formatINR(stats.averageCost)}</div>
+                <div className="text-caption">Average Cost</div>
               </div>
             </Card>
 
-            <Card variant="engineering" icon="shield" hover>
+            <Card variant="engineering" hover>
               <div className="text-center">
+                <div className="flex justify-center mb-3">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
                 <Badge variant={getRiskLevelVariant(stats.mostCommonRiskLevel)} size="lg">
                   {stats.mostCommonRiskLevel.toUpperCase()}
                 </Badge>
-                <div className="text-engineering-caption mt-2">Common Risk Level</div>
+                <div className="text-caption mt-2">Common Risk Level</div>
               </div>
             </Card>
           </div>
@@ -263,9 +283,14 @@ const ReportHistoryPage: React.FC = () => {
                 {searchTerm ? 'Try adjusting your search criteria.' : 'Get started by creating your first structural analysis report.'}
               </p>
               <Button
-                variant="engineering"
+                variant="primary"
                 onClick={() => navigate('/input')}
                 size="lg"
+                icon={
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                }
               >
                 New Assessment
               </Button>

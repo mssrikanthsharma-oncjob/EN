@@ -1,102 +1,78 @@
 import React from 'react';
-import Icon from './Icon';
 
-export type LoadingVariant = 'spinner' | 'dots' | 'pulse' | 'skeleton';
-export type LoadingSize = 'sm' | 'md' | 'lg' | 'xl';
+export type LoadingVariant = 'spinner' | 'dots' | 'pulse';
+export type LoadingSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface LoadingProps {
   variant?: LoadingVariant;
   size?: LoadingSize;
-  text?: string;
   className?: string;
-  fullScreen?: boolean;
+  text?: string;
 }
-
-const sizeClasses: Record<LoadingSize, { spinner: string; text: string; dots: string }> = {
-  sm: { spinner: 'w-4 h-4', text: 'text-sm', dots: 'w-2 h-2' },
-  md: { spinner: 'w-6 h-6', text: 'text-base', dots: 'w-3 h-3' },
-  lg: { spinner: 'w-8 h-8', text: 'text-lg', dots: 'w-4 h-4' },
-  xl: { spinner: 'w-12 h-12', text: 'text-xl', dots: 'w-5 h-5' }
-};
 
 const Loading: React.FC<LoadingProps> = ({
   variant = 'spinner',
   size = 'md',
-  text,
   className = '',
-  fullScreen = false
+  text
 }) => {
-  const sizeClass = sizeClasses[size];
+  const sizeClasses = {
+    xs: 'w-3 h-3',
+    sm: 'w-4 h-4',
+    md: 'w-6 h-6',
+    lg: 'w-8 h-8',
+    xl: 'w-12 h-12',
+  };
 
   const renderSpinner = () => (
-    <div className="flex flex-col items-center justify-center space-y-3">
-      <Icon name="loading" size={size === 'sm' ? 'sm' : size === 'md' ? 'md' : size === 'lg' ? 'lg' : 'xl'} className="text-blue-600" />
-      {text && <p className={`${sizeClass.text} text-gray-600 font-medium`}>{text}</p>}
-    </div>
+    <div className={`loading-spinner ${sizeClasses[size]} ${className}`} />
   );
 
   const renderDots = () => (
-    <div className="flex flex-col items-center justify-center space-y-3">
-      <div className="flex space-x-2">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className={`${sizeClass.dots} bg-blue-600 rounded-full animate-pulse`}
-            style={{
-              animationDelay: `${i * 0.2}s`,
-              animationDuration: '1.4s'
-            }}
-          />
-        ))}
-      </div>
-      {text && <p className={`${sizeClass.text} text-gray-600 font-medium`}>{text}</p>}
+    <div className={`flex space-x-1 ${className}`}>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className={`bg-primary-500 rounded-full animate-bounce ${
+            size === 'xs' ? 'w-1 h-1' :
+            size === 'sm' ? 'w-1.5 h-1.5' :
+            size === 'md' ? 'w-2 h-2' :
+            size === 'lg' ? 'w-3 h-3' : 'w-4 h-4'
+          }`}
+          style={{
+            animationDelay: `${i * 0.1}s`,
+            animationDuration: '0.6s'
+          }}
+        />
+      ))}
     </div>
   );
 
   const renderPulse = () => (
-    <div className="flex flex-col items-center justify-center space-y-3">
-      <div className={`${sizeClass.spinner} bg-blue-600 rounded-full animate-pulse-slow`} />
-      {text && <p className={`${sizeClass.text} text-gray-600 font-medium animate-pulse`}>{text}</p>}
-    </div>
+    <div className={`loading-pulse ${sizeClasses[size]} ${className}`} />
   );
 
-  const renderSkeleton = () => (
-    <div className="space-y-3 w-full max-w-sm">
-      <div className="h-4 bg-gray-200 rounded animate-pulse" />
-      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
-      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
-      {text && <p className={`${sizeClass.text} text-gray-600 font-medium text-center mt-4`}>{text}</p>}
-    </div>
-  );
-
-  const renderContent = () => {
+  const renderLoading = () => {
     switch (variant) {
       case 'dots':
         return renderDots();
       case 'pulse':
         return renderPulse();
-      case 'skeleton':
-        return renderSkeleton();
       default:
         return renderSpinner();
     }
   };
 
-  if (fullScreen) {
+  if (text) {
     return (
-      <div className="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl shadow-engineering-lg p-8 max-w-sm w-full mx-4">
-          {renderContent()}
-        </div>
+      <div className="flex items-center space-x-3">
+        {renderLoading()}
+        <span className="text-sm font-medium text-secondary-600">{text}</span>
       </div>
     );
   }
 
-  return (
-    <div className={`flex items-center justify-center p-4 ${className}`}>
-      {renderContent()}
-    </div>
-  );
+  return renderLoading();
 };
 
 export default Loading;

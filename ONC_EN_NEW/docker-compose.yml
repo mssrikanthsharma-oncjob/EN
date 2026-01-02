@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  enstructura-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    container_name: enstructura-consultants
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    
+  # Development service (optional)
+  enstructura-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "9000:9000"
+    container_name: enstructura-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    profiles:
+      - dev

@@ -15,9 +15,7 @@ import ConfigurationForm from '../components/forms/ConfigurationForm';
 import Progress, { type ProgressStep } from '../components/ui/Progress';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
-import Loading from '../components/ui/Loading';
 import Card from '../components/ui/Card';
-import Icon from '../components/ui/Icon';
 
 type FormStep = 'observations' | 'testResults' | 'photos' | 'configuration';
 
@@ -126,7 +124,6 @@ const InputPage: React.FC = () => {
   };
 
   const methods = useForm<FormData>({
-    // resolver: zodResolver(FormDataSchema),
     defaultValues: getDefaultFormData(),
     mode: 'onChange',
   });
@@ -230,10 +227,6 @@ const InputPage: React.FC = () => {
   ];
 
   const currentStepIndex = progressSteps.findIndex(step => step.id === currentStep);
-
-  // const goToStep = (step: FormStep) => {
-  //   setCurrentStep(step);
-  // };
 
   const goToNextStep = () => {
     // Clear previous validation errors
@@ -386,40 +379,33 @@ const InputPage: React.FC = () => {
     }
   };
 
-  // const getStepValidation = (step: FormStep): boolean => {
-  //   switch (step) {
-  //     case 'observations':
-  //       return !errors.observations;
-  //     case 'testResults':
-  //       return true; // Test results are optional
-  //     case 'photos':
-  //       return true; // Photos are optional
-  //     case 'configuration':
-  //       return !errors.configuration;
-  //     default:
-  //       return false;
-  //   }
-  // };
-
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pattern-blueprint">
+      <div className="min-h-screen bg-gradient-to-br from-secondary-50 via-primary-50 to-secondary-100 bg-pattern-dots">
         <Navigation />
-        <div className="py-12">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="section-padding">
+          <div className="container-modern">
             {/* Header */}
-            <div className="mb-12 text-center animate-fade-in">
-              <h1 className="text-engineering-title mb-4">
+            <div className="text-center mb-12 animate-fade-in">
+              <h1 className="text-heading-1 mb-4 text-gradient">
                 Structural Analysis Input
               </h1>
-              <p className="text-engineering-body max-w-2xl mx-auto mb-8">
+              <p className="text-body text-lg max-w-3xl mx-auto mb-8">
                 Complete all sections to generate your comprehensive structural assessment report with AI-powered analysis
               </p>
-              <div className="flex justify-center space-x-4">
+              
+              {/* Quick Actions */}
+              <div className="flex flex-wrap justify-center gap-4">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate('/history')}
+                  icon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  }
                 >
                   View History
                 </Button>
@@ -427,6 +413,11 @@ const InputPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={logout}
+                  icon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  }
                 >
                   Logout
                 </Button>
@@ -435,29 +426,27 @@ const InputPage: React.FC = () => {
 
             {/* Progress Steps */}
             <div className="mb-10 animate-slide-up">
-              <Card variant="engineering" className="p-8">
+              <div className="card p-8 card-gradient">
                 <Progress 
                   steps={progressSteps} 
                   currentStep={currentStep}
                   variant="horizontal"
                 />
-              </Card>
+              </div>
             </div>
 
-            {/* Form Content and Navigation */}
+            {/* Form Content */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <div className="animate-slide-up">
-                <Card variant="elevated" className="p-8 shadow-engineering-lg">
-                  <div className="space-engineering">
-                    {renderCurrentStep()}
-                  </div>
-                </Card>
+                <div className="card p-8 shadow-large">
+                  {renderCurrentStep()}
+                </div>
               </div>
 
               {/* Validation Errors */}
               {validationErrors.length > 0 && (
-                <div className="animate-fade-in mb-4">
-                  <Alert variant="error" title="Please fix the following errors:" className="shadow-lg">
+                <div className="animate-fade-in">
+                  <Alert variant="danger" title="Please fix the following errors:">
                     <ul className="list-disc list-inside space-y-1">
                       {validationErrors.map((error, index) => (
                         <li key={index} className="text-sm">{error}</li>
@@ -469,8 +458,8 @@ const InputPage: React.FC = () => {
 
               {/* Step Completion Message */}
               {stepCompletionMessage && (
-                <div className="animate-fade-in mb-4">
-                  <Alert variant="success" title="Step Completed" className="shadow-lg">
+                <div className="animate-fade-in">
+                  <Alert variant="success">
                     {stepCompletionMessage}
                   </Alert>
                 </div>
@@ -479,10 +468,10 @@ const InputPage: React.FC = () => {
               {/* Processing Status */}
               {(isSubmitting || processingStatus) && (
                 <div className="animate-fade-in">
-                  <Alert variant="info" title="Processing Report" className="shadow-lg">
+                  <Alert variant="info" title="Processing Report">
                     <div className="flex items-center space-x-3">
-                      <Loading variant="spinner" size="sm" />
-                      <span className="font-medium">{processingStatus || 'Please wait while we process your structural analysis...'}</span>
+                      <div className="loading-spinner w-5 h-5 flex-shrink-0"></div>
+                      <span>{processingStatus || 'Please wait while we process your structural analysis...'}</span>
                     </div>
                   </Alert>
                 </div>
@@ -492,11 +481,10 @@ const InputPage: React.FC = () => {
               {processingError && (
                 <div className="animate-fade-in">
                   <Alert 
-                    variant="error" 
+                    variant="danger" 
                     title="Processing Error"
                     dismissible
                     onDismiss={() => setProcessingError('')}
-                    className="shadow-lg"
                   >
                     {processingError}
                   </Alert>
@@ -505,44 +493,58 @@ const InputPage: React.FC = () => {
 
               {/* Navigation Buttons */}
               <div className="animate-slide-up">
-                <Card className="p-6 shadow-engineering">
-                  <div className="flex justify-between items-center">
+                <Card padding="md" className="shadow-medium">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <Button
                       variant="outline"
-                      icon="arrow-left"
                       onClick={goToPreviousStep}
                       disabled={currentStepIndex === 0}
                       size="md"
                       type="button"
+                      icon={
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      }
                     >
                       Previous Step
                     </Button>
 
-                    <div className="flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
-                      <Icon name="save" size="xs" className="text-green-600" />
-                      <span className="text-sm text-gray-600 font-medium">Auto-saved</span>
+                    <div className="flex items-center gap-3 px-4 py-2 bg-success-50 rounded-lg border border-success-200">
+                      <svg className="w-4 h-4 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm text-success-700 font-medium">Auto-saved</span>
                     </div>
 
-                    <div className="flex space-x-4">
+                    <div className="flex gap-4">
                       {currentStepIndex < progressSteps.length - 1 ? (
                         <Button
                           variant="primary"
-                          icon="arrow-right"
-                          iconPosition="right"
                           onClick={goToNextStep}
                           size="md"
                           type="button"
+                          iconPosition="right"
+                          icon={
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          }
                         >
                           Next Step
                         </Button>
                       ) : (
                         <Button
-                          variant="engineering"
-                          icon="check"
+                          variant="success"
                           type="submit"
                           loading={isSubmitting}
                           disabled={!isValid || processingError !== ''}
                           size="lg"
+                          icon={
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          }
                         >
                           {isSubmitting ? 'Generating Report...' : 'Generate Report'}
                         </Button>
