@@ -128,7 +128,7 @@ const InputPage: React.FC = () => {
     mode: 'onChange',
   });
 
-  const { handleSubmit, watch, setValue, formState: { isValid } } = methods;
+  const { handleSubmit, watch, setValue } = methods;
 
   // Load saved data on component mount
   useEffect(() => {
@@ -542,7 +542,6 @@ const InputPage: React.FC = () => {
                           variant="success"
                           type="submit"
                           loading={isSubmitting}
-                          disabled={!isValid || processingError !== ''}
                           size="lg"
                           fullWidth={true}
                           className="sm:w-auto"
