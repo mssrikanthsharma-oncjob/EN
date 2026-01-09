@@ -165,6 +165,7 @@ export interface ReportData {
   remediation: RemediationSection;
   materialEstimate: MaterialEstimate;
   costAnalysis: CostAnalysis;
+  photos: PhotoData[]; // Add photos to report data
   generatedAt: Date;
   version: string;
 }

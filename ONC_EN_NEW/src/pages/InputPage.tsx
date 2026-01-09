@@ -143,7 +143,32 @@ const InputPage: React.FC = () => {
       
       // Photos need special handling since File objects can't be serialized
       if (savedData.photos) {
-        setPhotos(savedData.photos as PhotoData[]);
+        // Restore photos with proper preview URLs
+        const restoredPhotos = savedData.photos.map((photo: any) => {
+          // Create a mock File object if it doesn't exist
+          if (!photo.file && photo.base64) {
+            const byteCharacters = atob(photo.base64.split(',')[1]);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: photo.metadata?.type || 'image/jpeg' });
+            photo.file = new File([blob], `photo_${photo.id}.jpg`, { 
+              type: photo.metadata?.type || 'image/jpeg',
+              lastModified: photo.metadata?.lastModified || Date.now()
+            });
+          }
+          
+          // Ensure preview URL exists
+          if (!photo.preview && photo.base64) {
+            photo.preview = photo.base64;
+          }
+          
+          return photo;
+        });
+        
+        setPhotos(restoredPhotos as PhotoData[]);
       }
     }
   }, [setValue]);

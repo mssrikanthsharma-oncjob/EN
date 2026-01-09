@@ -23,7 +23,20 @@ export const loadFormData = (): Partial<FormData> | null => {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
     if (savedData) {
-      return JSON.parse(savedData);
+      const parsedData = JSON.parse(savedData);
+      
+      // Restore photo preview URLs from base64 data
+      if (parsedData.photos && Array.isArray(parsedData.photos)) {
+        parsedData.photos = parsedData.photos.map((photo: any) => {
+          if (photo.base64 && !photo.preview) {
+            // Create a new preview URL from base64 data
+            photo.preview = photo.base64;
+          }
+          return photo;
+        });
+      }
+      
+      return parsedData;
     }
     return null;
   } catch (error) {

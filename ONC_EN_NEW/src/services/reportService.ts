@@ -34,7 +34,7 @@ export class ReportService {
         id: 'standard',
         name: 'Standard Engineering Report',
         description: 'Professional standard format for structural assessments',
-        sections: ['executive-summary', 'assessment', 'remediation', 'materials', 'costs', 'appendices'],
+        sections: ['executive-summary', 'assessment', 'remediation', 'materials', 'costs', 'photos', 'appendices'],
         styling: {
           headerColor: '#1f2937',
           accentColor: '#3b82f6',
@@ -46,7 +46,7 @@ export class ReportService {
         id: 'detailed',
         name: 'Detailed Technical Report',
         description: 'Comprehensive technical analysis with extensive details',
-        sections: ['cover', 'executive-summary', 'methodology', 'assessment', 'calculations', 'remediation', 'materials', 'costs', 'references', 'appendices'],
+        sections: ['cover', 'executive-summary', 'methodology', 'assessment', 'calculations', 'remediation', 'materials', 'costs', 'photos', 'references', 'appendices'],
         styling: {
           headerColor: '#374151',
           accentColor: '#059669',
@@ -122,6 +122,7 @@ export class ReportService {
         remediation: analysisResult.remediation,
         materialEstimate: analysisResult.materialEstimate,
         costAnalysis: analysisResult.costAnalysis,
+        photos: formData.photos, // Include photos in report data
         generatedAt: new Date(),
         version: '1.0'
       };
@@ -220,6 +221,9 @@ export class ReportService {
         break;
       case 'costs':
         currentY = this.generateCostsSection(pdf, reportData, template, currentY);
+        break;
+      case 'photos':
+        currentY = await this.generatePhotosSection(pdf, reportData, template, currentY);
         break;
       case 'key-findings':
         currentY = this.generateKeyFindings(pdf, reportData, template, currentY);
@@ -578,6 +582,99 @@ export class ReportService {
       pdf.text(formatINR(item.amount), 160, currentY);
       currentY += item.bold ? 8 : 6;
     });
+
+    return currentY;
+  }
+
+  /**
+   * Generate photos section
+   */
+  private async generatePhotosSection(
+    pdf: jsPDF, 
+    reportData: ReportData, 
+    template: ReportTemplate, 
+    startY: number
+  ): Promise<number> {
+    let currentY = startY;
+
+    if (!reportData.photos || reportData.photos.length === 0) {
+      return currentY;
+    }
+
+    // Section header
+    currentY = this.addSectionHeader(pdf, 'PHOTO DOCUMENTATION', template, currentY);
+
+    // Add photos in a grid layout
+    const photosPerRow = 2;
+    const photoWidth = 75; // mm
+    const photoHeight = 60; // mm
+    const photoSpacing = 10; // mm
+    const startX = 20; // mm
+
+    for (let i = 0; i < reportData.photos.length; i++) {
+      const photo = reportData.photos[i];
+      const row = Math.floor(i / photosPerRow);
+      const col = i % photosPerRow;
+      
+      const x = startX + col * (photoWidth + photoSpacing);
+      const y = currentY + row * (photoHeight + 20);
+
+      // Check if we need a new page
+      if (y + photoHeight > 250) {
+        pdf.addPage();
+        currentY = 20;
+        const newRow = Math.floor(i / photosPerRow) - Math.floor(i / photosPerRow);
+        const newY = currentY + newRow * (photoHeight + 20);
+        
+        try {
+          // Add photo to PDF using base64 data
+          if (photo.base64) {
+            pdf.addImage(photo.base64, 'JPEG', x, newY, photoWidth, photoHeight);
+            
+            // Add photo caption
+            pdf.setFontSize(8);
+            pdf.setTextColor('#666666');
+            const caption = photo.file?.name || `Photo ${i + 1}`;
+            const captionLines = pdf.splitTextToSize(caption, photoWidth);
+            pdf.text(captionLines, x, newY + photoHeight + 5);
+          }
+        } catch (error) {
+          console.error('Error adding photo to PDF:', error);
+          // Add placeholder if photo fails to load
+          pdf.setDrawColor('#cccccc');
+          pdf.rect(x, newY, photoWidth, photoHeight);
+          pdf.setFontSize(10);
+          pdf.setTextColor('#999999');
+          pdf.text('Photo unavailable', x + photoWidth/2, newY + photoHeight/2, { align: 'center' });
+        }
+      } else {
+        try {
+          // Add photo to PDF using base64 data
+          if (photo.base64) {
+            pdf.addImage(photo.base64, 'JPEG', x, y, photoWidth, photoHeight);
+            
+            // Add photo caption
+            pdf.setFontSize(8);
+            pdf.setTextColor('#666666');
+            const caption = photo.file?.name || `Photo ${i + 1}`;
+            const captionLines = pdf.splitTextToSize(caption, photoWidth);
+            pdf.text(captionLines, x, y + photoHeight + 5);
+          }
+        } catch (error) {
+          console.error('Error adding photo to PDF:', error);
+          // Add placeholder if photo fails to load
+          pdf.setDrawColor('#cccccc');
+          pdf.rect(x, y, photoWidth, photoHeight);
+          pdf.setFontSize(10);
+          pdf.setTextColor('#999999');
+          pdf.text('Photo unavailable', x + photoWidth/2, y + photoHeight/2, { align: 'center' });
+        }
+      }
+    }
+
+    // Calculate final Y position
+    const totalRows = Math.ceil(reportData.photos.length / photosPerRow);
+    currentY += totalRows * (photoHeight + 20) + 10;
 
     return currentY;
   }
