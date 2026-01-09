@@ -7,46 +7,136 @@ interface PhotoUploadFormProps {
   onPhotosChange: (photos: PhotoData[]) => void;
 }
 
+interface UploadProgress {
+  fileName: string;
+  progress: number;
+  status: 'uploading' | 'processing' | 'completed' | 'error';
+  error?: string;
+}
+
 const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChange }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
+
+  const validateImageQuality = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        // Check minimum dimensions for quality
+        const minWidth = 200;
+        const minHeight = 200;
+        const isGoodQuality = img.width >= minWidth && img.height >= minHeight;
+        URL.revokeObjectURL(img.src);
+        resolve(isGoodQuality);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(false);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   const handleFiles = useCallback(async (files: FileList) => {
     setUploading(true);
     const validFiles: File[] = [];
     const errors: string[] = [];
+    const progressArray: UploadProgress[] = [];
+
+    // Initialize progress tracking
+    Array.from(files).forEach(file => {
+      progressArray.push({
+        fileName: file.name,
+        progress: 0,
+        status: 'uploading'
+      });
+    });
+    setUploadProgress(progressArray);
 
     // Validate files
-    Array.from(files).forEach(file => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const progressIndex = i;
+      
+      // Update progress
+      setUploadProgress(prev => prev.map((p, idx) => 
+        idx === progressIndex ? { ...p, progress: 10, status: 'uploading' } : p
+      ));
+
       // Check file type
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         errors.push(`${file.name}: Invalid file type. Only JPEG, PNG, and WebP are allowed.`);
-        return;
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, status: 'error', error: 'Invalid file type' } : p
+        ));
+        continue;
       }
 
       // Check file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         errors.push(`${file.name}: File too large. Maximum size is 10MB.`);
-        return;
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, status: 'error', error: 'File too large' } : p
+        ));
+        continue;
       }
 
+      // Update progress
+      setUploadProgress(prev => prev.map((p, idx) => 
+        idx === progressIndex ? { ...p, progress: 30 } : p
+      ));
+
+      // Validate image quality
+      const isGoodQuality = await validateImageQuality(file);
+      if (!isGoodQuality) {
+        errors.push(`${file.name}: Image quality too low. Minimum 200x200 pixels required.`);
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, status: 'error', error: 'Image quality too low' } : p
+        ));
+        continue;
+      }
+
+      // Update progress
+      setUploadProgress(prev => prev.map((p, idx) => 
+        idx === progressIndex ? { ...p, progress: 60, status: 'processing' } : p
+      ));
+
       validFiles.push(file);
-    });
+    }
 
     if (errors.length > 0) {
-      alert(errors.join('\n'));
+      console.warn('File validation errors:', errors);
     }
 
     // Process valid files
     const newPhotos: PhotoData[] = [];
     
-    for (const file of validFiles) {
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      const progressIndex = Array.from(files).findIndex(f => f.name === file.name);
+      
       try {
+        // Update progress
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, progress: 80, status: 'processing' } : p
+        ));
+
         // Create preview URL
         const preview = URL.createObjectURL(file);
         
         // Convert to base64
         const base64 = await fileToBase64(file);
+        
+        // Validate the preview can be loaded
+        const canLoadPreview = await validatePreview(preview);
+        if (!canLoadPreview) {
+          URL.revokeObjectURL(preview);
+          setUploadProgress(prev => prev.map((p, idx) => 
+            idx === progressIndex ? { ...p, status: 'error', error: 'Cannot generate preview' } : p
+          ));
+          continue;
+        }
         
         const photoData: PhotoData = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -61,20 +151,38 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
         };
         
         newPhotos.push(photoData);
+        
+        // Complete progress
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, progress: 100, status: 'completed' } : p
+        ));
+        
       } catch (error) {
         console.error('Error processing file:', file.name, error);
-        errors.push(`${file.name}: Error processing file.`);
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === progressIndex ? { ...p, status: 'error', error: 'Processing failed' } : p
+        ));
       }
-    }
-
-    if (errors.length > 0) {
-      alert(errors.join('\n'));
     }
 
     // Update photos array
     onPhotosChange([...photos, ...newPhotos]);
-    setUploading(false);
+    
+    // Clear progress after a delay
+    setTimeout(() => {
+      setUploadProgress([]);
+      setUploading(false);
+    }, 2000);
   }, [photos, onPhotosChange]);
+
+  const validatePreview = (previewUrl: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = previewUrl;
+    });
+  };
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -199,13 +307,78 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
                       or drag and drop files here
                     </p>
                     <p className="text-xs text-gray-500">
-                      JPEG, PNG, WebP • Maximum 10MB per file
+                      JPEG, PNG, WebP • Maximum 10MB per file • Minimum 200x200 pixels
                     </p>
                   </div>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Upload Progress */}
+          {uploadProgress.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-gray-900">Upload Progress</h4>
+              {uploadProgress.map((progress, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-4 border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 truncate max-w-xs">
+                      {progress.fileName}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      {progress.status === 'completed' && (
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {progress.status === 'error' && (
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      {(progress.status === 'uploading' || progress.status === 'processing') && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      )}
+                      <span className="text-xs text-gray-500">
+                        {progress.progress}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        progress.status === 'completed' ? 'bg-green-600' :
+                        progress.status === 'error' ? 'bg-red-600' :
+                        progress.status === 'processing' ? 'bg-yellow-600' :
+                        'bg-blue-600'
+                      }`}
+                      style={{ width: `${progress.progress}%` }}
+                    ></div>
+                  </div>
+                  
+                  {/* Status Text */}
+                  <div className="mt-2 text-xs">
+                    {progress.status === 'uploading' && (
+                      <span className="text-blue-600">Uploading...</span>
+                    )}
+                    {progress.status === 'processing' && (
+                      <span className="text-yellow-600">Processing image...</span>
+                    )}
+                    {progress.status === 'completed' && (
+                      <span className="text-green-600">Upload completed</span>
+                    )}
+                    {progress.status === 'error' && (
+                      <span className="text-red-600">
+                        Error: {progress.error || 'Upload failed'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Photo Grid */}
           {photos.length > 0 && (
@@ -223,6 +396,44 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
                           src={photo.preview}
                           alt="Uploaded photo"
                           className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                          onError={(e) => {
+                            // Handle broken image
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                  <div class="text-center">
+                                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    <p class="text-xs text-gray-500">Preview failed</p>
+                                  </div>
+                                </div>
+                              `;
+                            }
+                          }}
+                          onLoad={(e) => {
+                            // Validate image loaded successfully
+                            const target = e.target as HTMLImageElement;
+                            if (target.naturalWidth === 0 || target.naturalHeight === 0) {
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `
+                                  <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                    <div class="text-center">
+                                      <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                      </svg>
+                                      <p class="text-xs text-gray-500">Invalid image</p>
+                                    </div>
+                                  </div>
+                                `;
+                              }
+                            }
+                          }}
                         />
                       </div>
                       
@@ -232,6 +443,7 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
                           type="button"
                           onClick={() => removePhoto(photo.id)}
                           className="opacity-0 group-hover:opacity-100 bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition-all duration-200 shadow-lg"
+                          title="Remove photo"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -241,8 +453,18 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
                       
                       {/* Photo Metadata */}
                       <div className="mt-2 text-xs text-gray-500 space-y-1">
-                        <p className="truncate font-medium">{photo.file.name}</p>
-                        <p className="text-gray-400">{formatFileSize(photo.metadata.size)}</p>
+                        <p className="truncate font-medium" title={photo.file.name}>
+                          {photo.file.name}
+                        </p>
+                        <div className="flex justify-between items-center">
+                          <p className="text-gray-400">{formatFileSize(photo.metadata.size)}</p>
+                          <div className="flex items-center space-x-1">
+                            <svg className="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-green-600 text-xs">Ready</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -261,6 +483,10 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
               </li>
               <li className="flex items-start space-x-2">
                 <span className="text-blue-600 mt-0.5">•</span>
+                <span>Minimum resolution: 200x200 pixels for quality assurance</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-600 mt-0.5">•</span>
                 <span>Include reference objects for scale when possible</span>
               </li>
               <li className="flex items-start space-x-2">
@@ -270,6 +496,10 @@ const PhotoUploadForm: React.FC<PhotoUploadFormProps> = ({ photos, onPhotosChang
               <li className="flex items-start space-x-2">
                 <span className="text-blue-600 mt-0.5">•</span>
                 <span>Ensure photos are in focus and properly oriented</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-blue-600 mt-0.5">•</span>
+                <span>Low quality images will be automatically rejected</span>
               </li>
             </ul>
           </div>
